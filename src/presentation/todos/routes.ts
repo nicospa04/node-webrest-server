@@ -11,8 +11,8 @@ export class ToDoRoutes {
         router.get('/',  toDosController.getToDos)
         router.get('/:id', toDosController.getToDoById)
         router.post('/', toDosController.createToDo)
-        router.put('/:id', toDosController.updateToDo)
-        router.delete('/:id', toDosController.updateToDo)
+        router.put('/:id', toDosController.updateTodo)
+        router.delete('/:id', toDosController.deleteToDo)
 
         return router
     }
