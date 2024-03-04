@@ -1,44 +1,55 @@
-import express from 'express'
-import path from 'path'
+import express, { Router } from 'express';
+import path from 'path';
 
-
-interface options {
-    PORT: number
-    PUBLIC_PATH: string
+interface Options {
+  port: number;
+  routes: Router;
+  public_path?: string;
 }
+
+
 export class Server {
 
-    private app = express()
+  private app = express();
+  private readonly port: number;
+  private readonly publicPath: string;
+  private readonly routes: Router;
 
-    private readonly PORT: number
-    private readonly PUBLIC_PATH: string
+  constructor(options: Options) {
+    const { port, routes, public_path = 'public' } = options;
+    this.port = port;
+    this.publicPath = public_path;
+    this.routes = routes;
+  }
 
-    constructor(options: options){
-        const {PORT, PUBLIC_PATH} = options
+  
+  
+  async start() {
+    
 
-        this.PORT = PORT
-        this.PUBLIC_PATH = PUBLIC_PATH
-    }
+    //* Middlewares
+    this.app.use( express.json() ); // raw
+    this.app.use( express.urlencoded({ extended: true }) ); // x-www-form-urlencoded
 
-    async start() {
+    //* Public Folder
+    this.app.use( express.static( this.publicPath ) );
 
-        //*MiddleWares
+
+    //* Routes
+    this.app.use( this.routes );
 
 
-        //*Public folder
+    //* SPA
+    this.app.get('*', (req, res) => {
+      const indexPath = path.join( __dirname + `../../../${ this.publicPath }/index.html` );
+      res.sendFile(indexPath);
+    });
+    
 
-        this.app.use(express.static(this.PUBLIC_PATH))
+    this.app.listen(this.port, () => {
+      console.log(`Server running on port ${ this.port }`);
+    });
 
-        this.app.get('*', (req,res) => {
-            const indexPath = path.join(__dirname, `../../${this.PUBLIC_PATH}/index.html`)
-            res.sendFile(indexPath)
-        })
+  }
 
-        //////////////////////////
-        this.app.listen(this.PORT || 3000, () => {
-            console.log('Server is running on', (this.PORT || 3000))
-
-        })
-        console.log('Server is running')
-    }
 }
